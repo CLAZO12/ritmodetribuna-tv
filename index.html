@@ -70,6 +70,12 @@
   .tarjeta p{font-size:12px;color:var(--gris);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .vacio{grid-column:1/-1;text-align:center;color:var(--gris);padding:30px 10px;font-size:14px}
 
+  /* Modo ventanita (imagen en imagen): solo el reproductor */
+  body.pip{padding:0;overflow:hidden;background:#000}
+  body.pip header, body.pip .ahora, body.pip main > section:not(.escenario){display:none!important}
+  body.pip .escenario{position:fixed;inset:0;padding:0}
+  body.pip .pantalla, body.pip .pantalla.vertical{position:fixed;inset:0;width:100vw;height:100vh;max-height:none;aspect-ratio:auto;border-radius:0;margin:0}
+
   @media (min-width:900px){
     main{display:grid;grid-template-columns:1.4fr 1fr;align-items:start}
     .escenario{position:sticky;top:76px}
@@ -113,6 +119,7 @@
 (function(){
   const $ = s => document.querySelector(s);
   let CFG = window.RDT_CONFIG || {categorias:[],canales:[]};
+  try{ const g = JSON.parse(localStorage.getItem("rdt_cfg")||"null"); if(g && g.canales) CFG = Object.assign({}, CFG, g); }catch(e){}
   let actual = null, categoria = "todo", texto = "";
 
   /* ---------- almacenamiento seguro de favoritos ---------- */
@@ -182,11 +189,14 @@
   $("#ahoraFav").addEventListener("click", ()=> actual && toggleFav(actual.id));
 
   let hlsInst = null;
-  function limpiar(){ $("#pantalla").classList.remove("vertical"); if(hlsInst){ try{hlsInst.destroy();}catch(e){} hlsInst=null; } $("#pantalla").innerHTML=""; }
+  function avisarAndroid(activo, vert){ try{ window.Android && Android.reproduciendo(!!activo, !!vert); }catch(e){} }
+  window.rdtPip = function(on){ document.body.classList.toggle("pip", !!on); };
+  function limpiar(){ avisarAndroid(false,false); $("#pantalla").classList.remove("vertical"); if(hlsInst){ try{hlsInst.destroy();}catch(e){} hlsInst=null; } $("#pantalla").innerHTML=""; }
 
   function reproducir(c){
     actual = c; limpiar(); pintarAhora(); pintar();
     window.scrollTo({top:0,behavior:"smooth"});
+    if(!pendiente(c)) avisarAndroid(true, c.tipo==="tiktok");
     if(pendiente(c)) return aviso("Canal por configurar", "Edita canales.js y pon el ID o la URL de este contenido.");
     const p = $("#pantalla");
     p.classList.toggle("vertical", c.tipo==="tiktok");
@@ -256,7 +266,8 @@
   iniciar();
   if(CFG.urlRemota){
     fetch(CFG.urlRemota+(CFG.urlRemota.includes("?")?"&":"?")+"t="+Date.now())
-      .then(r=>r.json()).then(j=>{ CFG = Object.assign({}, CFG, j); iniciar(); })
+      .then(r=>r.text()).then(t=>{ const j = JSON.parse(t.trim().startsWith("{") ? t : t.slice(t.indexOf("{", t.indexOf("RDT_CONFIG")), t.lastIndexOf("}")+1));
+        delete j.urlRemota; CFG = Object.assign({}, CFG, j); try{ localStorage.setItem("rdt_cfg", JSON.stringify(j)); }catch(e){} iniciar(); })
       .catch(()=>{});
   }
   /* Botón "atrás" de Android: si hay algo sonando, primero lo detiene */

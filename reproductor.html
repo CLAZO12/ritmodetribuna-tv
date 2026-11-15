@@ -85,6 +85,12 @@
   .item .acc{font-size:16px;padding:2px 6px;color:#8f9bb6}
   .msg{padding:16px 12px;color:#5f8f6c;font:12px "Courier New",monospace;text-align:center}
   .pie{display:flex;gap:6px;padding:8px 10px;font:11px monospace;color:#8f9bb6;align-items:center}
+  body.pip{overflow:hidden;background:#000}
+  body.pip .app{padding:0;max-width:none}
+  body.pip .ventana:not(:first-of-type), body.pip .barra, body.pip .lcd, body.pip .deslizadores, body.pip .controles{display:none!important}
+  body.pip .ventana{border:0;border-radius:0;margin:0;box-shadow:none;background:#000}
+  body.pip .principal{display:block;padding:0}
+  body.pip .tv{position:fixed;inset:0;aspect-ratio:auto;border:0;border-radius:0}
 </style>
 </head>
 <body>
@@ -160,7 +166,8 @@
 <script>
 (function(){
   const $ = s => document.querySelector(s);
-  const CFG = window.RDT_CONFIG || {};
+  let CFG = window.RDT_CONFIG || {};
+  try{ const g = JSON.parse(localStorage.getItem("rdt_cfg")||"null"); if(g && g.canales) CFG = Object.assign({}, CFG, g); }catch(e){}
   const YT_KEY = (CFG.youtubeApiKey||"").trim();
   const APP = "RitmoDeTribunaTV";
   const esc = s => String(s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
@@ -169,8 +176,7 @@
   const leer = (k,d)=>{ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
 
   /* ---------- catálogo propio (desde canales.js) ---------- */
-  const LISTAS = (CFG.canales||[]).filter(c=>c.tipo==="playlist" && (c.categoria==="cumbia"||c.categoria==="barra"));
-  const MIAS = (CFG.canales||[]).filter(c=>c.tipo==="youtube" && !/^PON_AQUI/.test(c.fuente))
+  let MIAS = (CFG.canales||[]).filter(c=>c.tipo==="youtube" && !/^PON_AQUI/.test(c.fuente))
     .map(c=>({src:"youtube", id:c.fuente, titulo:c.nombre, artista:"Ritmo de Tribuna", img:`https://i.ytimg.com/vi/${c.fuente}/mqdefault.jpg`}));
 
   /* ---------- estado ---------- */
@@ -357,6 +363,7 @@
   prog.addEventListener("change", ()=>{ const t = duracion()*prog.value/1000; if(actual){ actual.src==="youtube" ? (ytListo&&yt.seekTo(t,true)) : (audio.currentTime=t); } arrastrando=false; });
 
   function pintarEstado(){
+    avisarAndroid(sonando);
     $("#estado").textContent = sonando ? "▶" : (actual ? "❚❚" : "■");
     $("#bAleat").classList.toggle("on", aleatorio); $("#bRep").classList.toggle("on", repetir);
     $("#bEq").classList.toggle("on", !$("#ventanaEq").hidden);
@@ -390,8 +397,15 @@
   requestAnimationFrame(cuadro);
 
   /* ---------- botón atrás de Android: volver a la TV ---------- */
+  window.rdtPip = function(on){ document.body.classList.toggle("pip", !!on); };
+  function avisarAndroid(a){ try{ window.Android && Android.reproduciendo(!!a, false); }catch(e){} }
   window.rdtAtras = function(){ location.href = "index.html"; return true; };
 
+  if(CFG.urlRemota){ fetch(CFG.urlRemota+"?t="+Date.now()).then(r=>r.text()).then(t=>{
+      const j = JSON.parse(t.trim().startsWith("{") ? t : t.slice(t.indexOf("{", t.indexOf("RDT_CONFIG")), t.lastIndexOf("}")+1));
+      try{ localStorage.setItem("rdt_cfg", JSON.stringify(j)); }catch(e){}
+      MIAS = (j.canales||[]).filter(c=>c.tipo==="youtube" && !/^PON_AQUI/.test(c.fuente)).map(c=>({src:"youtube", id:c.fuente, titulo:c.nombre, artista:"Ritmo de Tribuna", img:`https://i.ytimg.com/vi/${c.fuente}/mqdefault.jpg`}));
+    }).catch(()=>{}); }
   pintar(); pintarEstado();
   if(idx>=0 && lista[idx]){ actual = lista[idx]; $("#titulo").textContent = `*** ${actual.titulo} · toca ▶ para continuar ***`; pintar(); }
 })();
