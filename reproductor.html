@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14171f">
+<title>Tribuna Player</title>
+<style>
+  :root{
+    --metal1:#3a3f4d; --metal2:#262a35; --metal3:#1a1d26; --borde:#55607a;
+    --lcd:#050a06; --verde:#3dff6e; --verde2:#1f9e3f; --ambar:#ffcc33; --azul:#4c8dff; --rojo:#ff4d5e;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:#0b0d12;color:#dfe6f5;font-family:system-ui,-apple-system,Roboto,sans-serif;min-height:100%}
+  button{font:inherit;color:inherit;border:0;background:none;cursor:pointer}
+  :focus-visible{outline:2px solid var(--ambar);outline-offset:2px}
+  .app{max-width:560px;margin:0 auto;padding:10px 10px 30px}
+
+  /* Ventanas estilo metal */
+  .ventana{background:linear-gradient(180deg,var(--metal1),var(--metal2) 40%,var(--metal3));border:1px solid var(--borde);border-radius:8px;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 6px 18px rgba(0,0,0,.5);margin-bottom:10px;overflow:hidden}
+  .barra{display:flex;align-items:center;gap:8px;padding:6px 10px;font-size:11px;font-weight:800;letter-spacing:2px;color:#c7d2ea;
+    background:repeating-linear-gradient(90deg,#2b3140 0 2px,#323949 2px 4px);border-bottom:1px solid #11141b}
+  .barra .t{flex:1;text-align:center}
+  .barra a,.barra button{color:#9fb0d6;text-decoration:none;font-size:12px;letter-spacing:0;font-weight:700}
+
+  /* Pantalla principal */
+  .principal{display:grid;grid-template-columns:150px 1fr;gap:10px;padding:10px}
+  .tv{position:relative;aspect-ratio:16/10;background:#000;border:2px solid #0e1118;border-radius:4px;overflow:hidden}
+  .tv iframe,.tv #yt,.tv img{position:absolute;inset:0;width:100%;height:100%;border:0;object-fit:cover}
+  .tv .vacio{position:absolute;inset:0;display:grid;place-items:center;color:var(--verde2);font:700 12px monospace;text-align:center}
+  .lcd{background:var(--lcd);border:2px solid #0e1118;border-radius:4px;padding:6px 8px;font-family:"Courier New",monospace;color:var(--verde);
+    text-shadow:0 0 6px rgba(61,255,110,.6);min-width:0;display:flex;flex-direction:column;gap:4px}
+  .fila{display:flex;align-items:center;gap:8px}
+  .tiempo{font-size:28px;font-weight:700;letter-spacing:1px;line-height:1}
+  .estado{font-size:12px;color:var(--verde)}
+  .marquesina{overflow:hidden;white-space:nowrap;font-size:13px;border-top:1px dashed #0f3a1b;padding-top:3px}
+  .marquesina span{display:inline-block;padding-left:100%;animation:corre 12s linear infinite}
+  @keyframes corre{to{transform:translateX(-100%)}}
+  .info{font-size:10px;color:var(--verde2);display:flex;gap:10px}
+  canvas#espectro{width:100%;height:34px;display:block}
+
+  /* Barra de progreso y volumen */
+  .deslizadores{padding:0 10px 8px;display:grid;grid-template-columns:1fr 110px;gap:12px;align-items:center}
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:8px;border-radius:4px;background:#0c0f15;border:1px solid #444d63}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:14px;border-radius:3px;background:linear-gradient(#e8edf8,#8d97ad);border:1px solid #222}
+  .vol label{font-size:9px;color:#8f9bb6;letter-spacing:1px;display:block;margin-bottom:2px}
+
+  /* Botones de control */
+  .controles{display:flex;gap:6px;padding:0 10px 10px;align-items:center;flex-wrap:wrap}
+  .btn{min-width:44px;height:36px;padding:0 10px;border-radius:5px;font-size:16px;font-weight:800;color:#e9eefb;
+    background:linear-gradient(180deg,#5b6378,#3a4152 55%,#2b3141);border:1px solid #11141b;box-shadow:inset 0 1px 0 rgba(255,255,255,.18)}
+  .btn:active{background:linear-gradient(180deg,#2b3141,#3a4152)}
+  .btn.on{color:var(--verde);text-shadow:0 0 6px rgba(61,255,110,.7)}
+  .btn.peq{font-size:11px;letter-spacing:1px;height:30px;min-width:0;white-space:nowrap;flex:none}
+  .espacio{flex:1}
+
+  /* Ecualizador */
+  .eq{display:flex;align-items:flex-end;gap:6px;padding:10px 10px 6px;overflow-x:auto}
+  .banda{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;min-width:24px}
+  .banda input{writing-mode:vertical-lr;direction:rtl;width:10px;height:90px;padding:0}
+  .banda input[type=range]::-webkit-slider-thumb{width:18px;height:10px}
+  .banda span{font-size:9px;color:#8f9bb6;font-family:monospace}
+  .eqnota{font-size:10px;color:#8f9bb6;padding:0 10px 8px}
+  .presets{display:flex;gap:6px;padding:0 10px 10px;flex-wrap:wrap}
+
+  /* Lista de reproducción */
+  .buscador{display:flex;gap:6px;padding:10px 10px 6px}
+  .buscador input{flex:1;min-width:0;background:#06080c;color:var(--verde);border:1px solid #444d63;border-radius:5px;padding:9px 10px;font:14px "Courier New",monospace}
+  .buscador input::placeholder{color:#2f6a40}
+  .fuentes{display:flex;gap:6px;padding:0 10px 8px;flex-wrap:wrap}
+  .fuente{font-size:11px;font-weight:800;padding:5px 10px;border-radius:999px;background:#1a1e28;color:#8f9bb6;border:1px solid #333b4f}
+  .fuente.on{background:#0f2a17;color:var(--verde);border-color:var(--verde2)}
+  .pestanas{display:flex;border-top:1px solid #11141b;border-bottom:1px solid #11141b}
+  .pestanas button{flex:1;padding:8px;font-size:11px;font-weight:800;letter-spacing:1px;color:#8f9bb6;background:#1a1e28}
+  .pestanas button.on{color:var(--verde);background:#06080c}
+  .lista{background:#06080c;max-height:46vh;overflow-y:auto;font-family:"Courier New",monospace;font-size:13px}
+  .item{display:flex;align-items:center;gap:8px;padding:7px 10px;color:var(--verde);border-bottom:1px solid #0d1a10;width:100%;text-align:left}
+  .item:nth-child(odd){background:#070b08}
+  .item.sonando{background:#0f3a1b!important;color:#fff}
+  .item .n{color:var(--verde2);min-width:22px}
+  .item .tit{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .item .tit small{display:block;color:var(--verde2);font-size:11px}
+  .item .tag{font-size:9px;padding:1px 5px;border-radius:3px;border:1px solid currentColor;opacity:.8}
+  .item .acc{font-size:16px;padding:2px 6px;color:#8f9bb6}
+  .msg{padding:16px 12px;color:#5f8f6c;font:12px "Courier New",monospace;text-align:center}
+  .pie{display:flex;gap:6px;padding:8px 10px;font:11px monospace;color:#8f9bb6;align-items:center}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ===== VENTANA PRINCIPAL ===== -->
+  <section class="ventana">
+    <div class="barra"><a href="index.html">◀ TV</a><span class="t">TRIBUNA PLAYER</span><span style="width:30px"></span></div>
+    <div class="principal">
+      <div class="tv" id="tv"><img src="logo.png" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#010551"><div id="yt"></div></div>
+      <div class="lcd">
+        <div class="fila"><span class="estado" id="estado">■</span><span class="tiempo" id="tiempo">00:00</span></div>
+        <div class="marquesina"><span id="titulo">*** TRIBUNA PLAYER *** Busca tu música y dale play ***</span></div>
+        <div class="info"><span id="fuenteInfo">---</span><span id="durInfo">--:--</span></div>
+        <canvas id="espectro" width="300" height="34"></canvas>
+      </div>
+    </div>
+    <div class="deslizadores">
+      <input type="range" id="progreso" min="0" max="1000" value="0" aria-label="Progreso">
+      <div class="vol"><label>VOLUMEN</label><input type="range" id="volumen" min="0" max="100" value="80" aria-label="Volumen"></div>
+    </div>
+    <div class="controles">
+      <button class="btn" id="bAnt" aria-label="Anterior">⏮</button>
+      <button class="btn" id="bPlay" aria-label="Reproducir">▶</button>
+      <button class="btn" id="bPausa" aria-label="Pausa">⏸</button>
+      <button class="btn" id="bStop" aria-label="Detener">⏹</button>
+      <button class="btn" id="bSig" aria-label="Siguiente">⏭</button>
+      <span class="espacio"></span>
+      <button class="btn peq" id="bAleat">ALEAT</button>
+      <button class="btn peq" id="bRep">REP</button>
+      <button class="btn peq" id="bEq">EQ</button>
+    </div>
+  </section>
+
+  <!-- ===== ECUALIZADOR ===== -->
+  <section class="ventana" id="ventanaEq" hidden>
+    <div class="barra"><span class="t">ECUALIZADOR</span></div>
+    <div class="eq" id="eq"></div>
+    <div class="presets">
+      <button class="btn peq" data-preset="plano">PLANO</button>
+      <button class="btn peq" data-preset="cumbia">CUMBIA</button>
+      <button class="btn peq" data-preset="bajos">+BAJOS</button>
+      <button class="btn peq" data-preset="voz">VOZ</button>
+      <button class="btn peq" data-preset="fiesta">FIESTA</button>
+    </div>
+    <div class="eqnota" id="eqNota">El ecualizador actúa sobre canciones de Audius. YouTube no permite modificar su audio.</div>
+  </section>
+
+  <!-- ===== LISTA Y BUSCADOR ===== -->
+  <section class="ventana">
+    <div class="barra"><span class="t">LISTA DE REPRODUCCIÓN</span></div>
+    <form class="buscador" id="formBuscar">
+      <input id="q" type="search" placeholder="Buscar canción o artista…" autocomplete="off">
+      <button class="btn" type="submit" aria-label="Buscar">🔍</button>
+    </form>
+    <div class="fuentes" id="fuentes">
+      <button class="fuente on" data-f="todo">TODO</button>
+      <button class="fuente" data-f="mias">MIS CANCIONES</button>
+      <button class="fuente" data-f="youtube">YOUTUBE</button>
+      <button class="fuente" data-f="audius">AUDIUS</button>
+    </div>
+    <div class="pestanas">
+      <button id="tLista" class="on">MI LISTA (<span id="nLista">0</span>)</button>
+      <button id="tRes">RESULTADOS (<span id="nRes">0</span>)</button>
+    </div>
+    <div class="lista" id="lista"></div>
+    <div class="pie"><span id="pieTxt">Toca una canción para reproducir · ＋ agrega a tu lista</span><span class="espacio"></span>
+      <button class="btn peq" id="bLimpiar">VACIAR</button></div>
+  </section>
+</div>
+
+<script src="canales.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const CFG = window.RDT_CONFIG || {};
+  const YT_KEY = (CFG.youtubeApiKey||"").trim();
+  const APP = "RitmoDeTribunaTV";
+  const esc = s => String(s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  const mmss = t => { t = Math.max(0, Math.floor(t||0)); return String(Math.floor(t/60)).padStart(2,"0")+":"+String(t%60).padStart(2,"0"); };
+  const guardar = (k,v)=>{ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} };
+  const leer = (k,d)=>{ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null?d:v; }catch(e){ return d; } };
+
+  /* ---------- catálogo propio (desde canales.js) ---------- */
+  const LISTAS = (CFG.canales||[]).filter(c=>c.tipo==="playlist" && (c.categoria==="cumbia"||c.categoria==="barra"));
+  const MIAS = (CFG.canales||[]).filter(c=>c.tipo==="youtube" && !/^PON_AQUI/.test(c.fuente))
+    .map(c=>({src:"youtube", id:c.fuente, titulo:c.nombre, artista:"Ritmo de Tribuna", img:`https://i.ytimg.com/vi/${c.fuente}/mqdefault.jpg`}));
+
+  /* ---------- estado ---------- */
+  let lista = leer("rdt_lista", null) || MIAS.slice();
+  let resultados = [], vista = "lista", fuente = "todo";
+  let idx = leer("rdt_idx", -1), aleatorio = leer("rdt_alea", false), repetir = leer("rdt_rep", false);
+  let actual = null, sonando = false, arrastrando = false;
+
+  /* ---------- motor: audio HTML5 (Audius) ---------- */
+  const audio = new Audio(); audio.preload = "auto";
+  let ctx=null, nodos=[], analizador=null, srcNodo=null, eqOk=false;
+  const BANDAS=[60,170,310,600,1000,3000,6000,12000,14000,16000];
+  let ganancias = leer("rdt_eq", BANDAS.map(()=>0));
+  function montarEq(){
+    if(ctx) return true;
+    try{
+      ctx = new (window.AudioContext||window.webkitAudioContext)();
+      srcNodo = ctx.createMediaElementSource(audio);
+      let prev = srcNodo;
+      nodos = BANDAS.map((f,i)=>{ const b=ctx.createBiquadFilter(); b.type = i===0?"lowshelf":i===BANDAS.length-1?"highshelf":"peaking"; b.frequency.value=f; b.Q.value=1.1; b.gain.value=ganancias[i]; prev.connect(b); prev=b; return b; });
+      analizador = ctx.createAnalyser(); analizador.fftSize = 64;
+      prev.connect(analizador); analizador.connect(ctx.destination);
+      return true;
+    }catch(e){ ctx=null; return false; }
+  }
+  audio.addEventListener("ended", ()=> siguiente(true));
+  audio.addEventListener("playing", ()=>{ sonando=true; pintarEstado(); });
+  audio.addEventListener("pause", ()=>{ sonando=false; pintarEstado(); });
+
+  /* ---------- motor: YouTube IFrame API ---------- */
+  let yt=null, ytListo=false, ytPendiente=null;
+  window.onYouTubeIframeAPIReady = function(){
+    yt = new YT.Player("yt", { width:"100%", height:"100%",
+      playerVars:{ playsinline:1, rel:0, modestbranding:1, origin: location.origin },
+      events:{
+        onReady(){ ytListo=true; yt.setVolume(+$("#volumen").value); if(ytPendiente){ const p=ytPendiente; ytPendiente=null; p(); } },
+        onStateChange(e){
+          if(e.data===YT.PlayerState.PLAYING){ sonando=true; }
+          else if(e.data===YT.PlayerState.PAUSED || e.data===YT.PlayerState.CUED){ sonando=false; }
+          else if(e.data===YT.PlayerState.ENDED){ sonando=false; siguiente(true); }
+          pintarEstado();
+        },
+        onError(){ $("#titulo").textContent = "*** Este video no se puede reproducir fuera de YouTube · pasando al siguiente ***"; setTimeout(()=>siguiente(true), 1500); }
+      }});
+  };
+  (function(){ const s=document.createElement("script"); s.src="https://www.youtube.com/iframe_api"; document.head.appendChild(s); })();
+
+  /* ---------- reproducción ---------- */
+  function tocar(lst, i){
+    if(lst!==lista){ // al tocar un resultado se agrega a la lista
+      const t = lst[i]; const ya = lista.findIndex(x=>x.src===t.src && x.id===t.id);
+      if(ya<0){ lista.push(t); i = lista.length-1; } else i = ya;
+      guardarLista();
+    }
+    idx = i; actual = lista[idx]; guardar("rdt_idx", idx);
+    detenerTodo();
+    $("#titulo").textContent = `*** ${actual.artista ? actual.artista+" - " : ""}${actual.titulo} ***`;
+    $("#fuenteInfo").textContent = actual.src==="youtube" ? "YOUTUBE" : "AUDIUS 320K";
+    $("#durInfo").textContent = actual.dur ? mmss(actual.dur) : "--:--";
+    const tv = $("#tv");
+    if(actual.src==="youtube"){
+      tv.querySelector("img")?.remove();
+      $("#yt").style.visibility="visible";
+      const go = ()=> yt.loadVideoById(actual.id);
+      ytListo ? go() : (ytPendiente = go);
+      $("#eqNota").textContent = "El ecualizador actúa sobre canciones de Audius. YouTube no permite modificar su audio.";
+    } else {
+      $("#yt").style.visibility="hidden";
+      tv.querySelector("img")?.remove();
+      if(actual.img){ const im=document.createElement("img"); im.src=actual.img; im.alt=""; tv.appendChild(im); }
+      reproducirAudius(actual);
+    }
+    pintar(); pintarEstado();
+  }
+  async function reproducirAudius(t){
+    try{
+      const host = await hostAudius();
+      const url = `${host}/v1/tracks/${encodeURIComponent(t.id)}/stream?app_name=${APP}`;
+      audio.crossOrigin = "anonymous"; audio.src = url;
+      audio.onerror = ()=>{ // si el servidor no permite CORS, reproducir sin ecualizador
+        if(audio.crossOrigin){ audio.crossOrigin = null; eqOk=false; $("#eqNota").textContent="Esta canción suena sin ecualizador (el servidor no lo permite)."; audio.src = url; audio.play().catch(()=>{}); }
+        else { $("#titulo").textContent="*** No se pudo cargar la canción · pasando a la siguiente ***"; setTimeout(()=>siguiente(true),1500); }
+      };
+      eqOk = montarEq(); if(ctx && ctx.state==="suspended") ctx.resume();
+      $("#eqNota").textContent = eqOk ? "Ecualizador activo." : "Esta canción suena sin ecualizador.";
+      await audio.play();
+    }catch(e){}
+  }
+  function detenerTodo(){ try{ audio.pause(); }catch(e){} if(ytListo){ try{ yt.stopVideo(); }catch(e){} } sonando=false; }
+  function play(){
+    if(!actual){ if(lista.length) tocar(lista, Math.max(0,idx)); return; }
+    if(actual.src==="youtube"){ ytListo && yt.playVideo(); } else { if(ctx&&ctx.state==="suspended") ctx.resume(); audio.play().catch(()=>{}); }
+  }
+  function pausa(){ if(!actual) return; actual.src==="youtube" ? (ytListo&&yt.pauseVideo()) : audio.pause(); }
+  function stop(){ if(!actual) return; if(actual.src==="youtube"){ ytListo&&yt.stopVideo(); } else { audio.pause(); audio.currentTime=0; } sonando=false; pintarEstado(); }
+  function siguiente(auto){
+    if(!lista.length) return;
+    if(auto && repetir && idx>=0) return tocar(lista, idx);
+    let n = aleatorio ? Math.floor(Math.random()*lista.length) : idx+1;
+    if(n>=lista.length){ if(auto && !repetir){ stop(); return; } n=0; }
+    tocar(lista, n);
+  }
+  function anterior(){ if(!lista.length) return; tocar(lista, idx>0 ? idx-1 : lista.length-1); }
+  const tiempoActual = ()=> !actual ? 0 : actual.src==="youtube" ? (ytListo? yt.getCurrentTime()||0 : 0) : audio.currentTime||0;
+  const duracion = ()=> !actual ? 0 : actual.src==="youtube" ? (ytListo? yt.getDuration()||0 : 0) : (isFinite(audio.duration)? audio.duration : (actual.dur||0));
+
+  /* ---------- búsqueda ---------- */
+  let audiusHost=null;
+  async function hostAudius(){
+    if(audiusHost) return audiusHost;
+    const r = await fetch("https://api.audius.co"); const j = await r.json();
+    audiusHost = j.data[Math.floor(Math.random()*j.data.length)]; return audiusHost;
+  }
+  async function buscarAudius(q){
+    const host = await hostAudius();
+    const r = await fetch(`${host}/v1/tracks/search?query=${encodeURIComponent(q)}&app_name=${APP}`); const j = await r.json();
+    return (j.data||[]).filter(t=>t.is_streamable!==false).slice(0,25).map(t=>({src:"audius", id:t.id, titulo:t.title, artista:t.user&&t.user.name, dur:t.duration, img:t.artwork&&(t.artwork["480x480"]||t.artwork["150x150"])}));
+  }
+  async function buscarYouTube(q){
+    if(!YT_KEY) return [];
+    const r = await fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&videoEmbeddable=true&videoCategoryId=10&maxResults=25&q=${encodeURIComponent(q)}&key=${YT_KEY}`);
+    const j = await r.json(); if(j.error) throw new Error(j.error.message);
+    const div = document.createElement("div");
+    const dec = s => { div.innerHTML = s; return div.textContent; };
+    return (j.items||[]).map(it=>({src:"youtube", id:it.id.videoId, titulo:dec(it.snippet.title), artista:dec(it.snippet.channelTitle), img:it.snippet.thumbnails&&it.snippet.thumbnails.medium&&it.snippet.thumbnails.medium.url}));
+  }
+  $("#formBuscar").addEventListener("submit", async e=>{
+    e.preventDefault(); const q = $("#q").value.trim(); if(!q) return;
+    vista="res"; resultados=[]; pintar("Buscando…");
+    const ql = q.toLowerCase(); const tareas=[]; const avisos=[];
+    if(fuente==="todo"||fuente==="mias") tareas.push(Promise.resolve(MIAS.filter(t=>t.titulo.toLowerCase().includes(ql))));
+    if(fuente==="todo"||fuente==="youtube"){
+      if(YT_KEY) tareas.push(buscarYouTube(q).catch(err=>{ avisos.push("YouTube: "+err.message); return []; }));
+      else if(fuente==="youtube") avisos.push("Para buscar en YouTube falta la clave (youtubeApiKey en canales.js).");
+    }
+    if(fuente==="todo"||fuente==="audius") tareas.push(buscarAudius(q).catch(()=>{ avisos.push("Audius no respondió."); return []; }));
+    const partes = await Promise.all(tareas);
+    resultados = [].concat(...partes);
+    pintar(resultados.length ? null : ("Sin resultados. "+avisos.join(" ")));
+    $("#pieTxt").textContent = avisos.length && resultados.length ? avisos.join(" ") : "Toca una canción para reproducir · ＋ agrega a tu lista";
+  });
+  $("#fuentes").addEventListener("click", e=>{ const b=e.target.closest(".fuente"); if(!b) return;
+    fuente=b.dataset.f; document.querySelectorAll(".fuente").forEach(x=>x.classList.toggle("on", x===b));
+    if(fuente==="mias"){ vista="res"; resultados=MIAS.slice(); pintar(); }
+  });
+
+  /* ---------- pintar lista ---------- */
+  function guardarLista(){ guardar("rdt_lista", lista); }
+  function pintar(msg){
+    $("#tLista").classList.toggle("on", vista==="lista"); $("#tRes").classList.toggle("on", vista==="res");
+    $("#nLista").textContent = lista.length; $("#nRes").textContent = resultados.length;
+    const L = vista==="lista" ? lista : resultados;
+    if(msg){ $("#lista").innerHTML = `<div class="msg">${esc(msg)}</div>`; return; }
+    if(!L.length){ $("#lista").innerHTML = `<div class="msg">${vista==="lista"?"Tu lista está vacía. Busca canciones arriba.":"Escribe algo y toca 🔍"}</div>`; return; }
+    $("#lista").innerHTML = L.map((t,i)=>{
+      const son = actual && t.src===actual.src && t.id===actual.id;
+      return `<div class="item${son?" sonando":""}" data-i="${i}" role="button" tabindex="0">
+        <span class="n">${son&&sonando?"▶":(i+1)+"."}</span>
+        <span class="tit">${esc(t.titulo)}<small>${esc(t.artista||"")}${t.dur?" · "+mmss(t.dur):""}</small></span>
+        <span class="tag">${t.src==="youtube"?"YT":"AU"}</span>
+        ${vista==="lista" ? `<button class="acc" data-quitar="${i}" aria-label="Quitar">✕</button>` : `<button class="acc" data-agregar="${i}" aria-label="Agregar">＋</button>`}
+      </div>`; }).join("");
+  }
+  $("#lista").addEventListener("click", e=>{
+    const q = e.target.closest("[data-quitar]"), a = e.target.closest("[data-agregar]");
+    if(q){ const i=+q.dataset.quitar; lista.splice(i,1); if(i<idx) idx--; else if(i===idx){ idx=-1; } guardarLista(); pintar(); return; }
+    if(a){ const t=resultados[+a.dataset.agregar]; if(!lista.some(x=>x.src===t.src&&x.id===t.id)){ lista.push(t); guardarLista(); } a.textContent="✓"; $("#nLista").textContent=lista.length; return; }
+    const it = e.target.closest(".item"); if(it) tocar(vista==="lista"?lista:resultados, +it.dataset.i);
+  });
+  $("#tLista").onclick = ()=>{ vista="lista"; pintar(); };
+  $("#tRes").onclick = ()=>{ vista="res"; pintar(); };
+  $("#bLimpiar").onclick = ()=>{ if(vista==="lista"){ lista=[]; idx=-1; guardarLista(); } else resultados=[]; pintar(); };
+
+  /* ---------- controles ---------- */
+  $("#bPlay").onclick = play; $("#bPausa").onclick = pausa; $("#bStop").onclick = stop;
+  $("#bSig").onclick = ()=>siguiente(false); $("#bAnt").onclick = anterior;
+  $("#bAleat").onclick = ()=>{ aleatorio=!aleatorio; guardar("rdt_alea",aleatorio); pintarEstado(); };
+  $("#bRep").onclick = ()=>{ repetir=!repetir; guardar("rdt_rep",repetir); pintarEstado(); };
+  $("#bEq").onclick = ()=>{ const v=$("#ventanaEq"); v.hidden=!v.hidden; pintarEstado(); };
+  $("#volumen").addEventListener("input", e=>{ const v=+e.target.value; audio.volume=v/100; if(ytListo) yt.setVolume(v); });
+  audio.volume = 0.8;
+  const prog = $("#progreso");
+  prog.addEventListener("input", ()=>{ arrastrando=true; $("#tiempo").textContent = mmss(duracion()*prog.value/1000); });
+  prog.addEventListener("change", ()=>{ const t = duracion()*prog.value/1000; if(actual){ actual.src==="youtube" ? (ytListo&&yt.seekTo(t,true)) : (audio.currentTime=t); } arrastrando=false; });
+
+  function pintarEstado(){
+    $("#estado").textContent = sonando ? "▶" : (actual ? "❚❚" : "■");
+    $("#bAleat").classList.toggle("on", aleatorio); $("#bRep").classList.toggle("on", repetir);
+    $("#bEq").classList.toggle("on", !$("#ventanaEq").hidden);
+    document.querySelectorAll(".item .n").forEach((n,i)=>{ const it=n.parentElement; if(it.classList.contains("sonando")) n.textContent = sonando?"▶":(i+1)+"."; });
+  }
+
+  /* ---------- ecualizador ---------- */
+  const PRESETS = { plano:[0,0,0,0,0,0,0,0,0,0], cumbia:[4,3,1,0,1,2,3,3,2,1], bajos:[8,6,4,1,0,0,0,0,0,0], voz:[-2,-1,0,2,4,4,3,1,0,-1], fiesta:[6,5,2,0,-1,1,3,5,5,4] };
+  $("#eq").innerHTML = BANDAS.map((f,i)=>`<div class="banda"><input type="range" min="-12" max="12" step="1" value="${ganancias[i]}" data-b="${i}" aria-label="${f} Hz"><span>${f>=1000?(f/1000)+"K":f}</span></div>`).join("");
+  function aplicarEq(){ ganancias.forEach((g,i)=>{ if(nodos[i]) nodos[i].gain.value=g; }); guardar("rdt_eq", ganancias); }
+  $("#eq").addEventListener("input", e=>{ const b=e.target.dataset.b; if(b==null) return; ganancias[+b]=+e.target.value; aplicarEq(); });
+  document.querySelector(".presets").addEventListener("click", e=>{ const p=e.target.dataset.preset; if(!p) return;
+    ganancias = PRESETS[p].slice(); document.querySelectorAll("#eq input").forEach((s,i)=> s.value=ganancias[i]); aplicarEq(); });
+
+  /* ---------- reloj y espectro ---------- */
+  const cv = $("#espectro"), g = cv.getContext("2d"); const datos = new Uint8Array(32); let falsas = new Array(24).fill(0);
+  function cuadro(){
+    const d = duracion(), t = tiempoActual();
+    if(!arrastrando){ $("#tiempo").textContent = mmss(t); prog.value = d ? Math.min(1000, t/d*1000) : 0; }
+    if(d && $("#durInfo").textContent==="--:--") $("#durInfo").textContent = mmss(d);
+    g.clearRect(0,0,cv.width,cv.height);
+    const N=24, w=cv.width/N;
+    let vals;
+    if(sonando && eqOk && analizador && actual && actual.src==="audius"){ analizador.getByteFrequencyData(datos); vals=[...datos].slice(0,N).map(v=>v/255); }
+    else { falsas = falsas.map((v,i)=> sonando ? Math.max(.05, v*.7 + Math.random()*.55*(1-i/N*.6)) : v*.85); vals=falsas; }
+    vals.forEach((v,i)=>{ const h=Math.max(1, v*cv.height);
+      const gr=g.createLinearGradient(0,cv.height,0,0); gr.addColorStop(0,"#1f9e3f"); gr.addColorStop(.7,"#3dff6e"); gr.addColorStop(1,"#ffcc33");
+      g.fillStyle=gr; g.fillRect(i*w+1, cv.height-h, w-2, h); });
+    requestAnimationFrame(cuadro);
+  }
+  requestAnimationFrame(cuadro);
+
+  /* ---------- botón atrás de Android: volver a la TV ---------- */
+  window.rdtAtras = function(){ location.href = "index.html"; return true; };
+
+  pintar(); pintarEstado();
+  if(idx>=0 && lista[idx]){ actual = lista[idx]; $("#titulo").textContent = `*** ${actual.titulo} · toca ▶ para continuar ***`; pintar(); }
+})();
+</script>
+</body>
+</html>

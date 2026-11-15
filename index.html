@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a1633">
+<title>Ritmo de Tribuna TV</title>
+<style>
+  :root{
+    --azul:#0b2a6f; --azul2:#1446b8; --noche:#0a1633; --panel:#111f45;
+    --blanco:#f4f7ff; --gris:#9fb0d6; --rojo:#ff3355; --oro:#ffd166;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{background:var(--noche);color:var(--blanco);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;min-height:100%}
+  body{padding-bottom:env(safe-area-inset-bottom)}
+  button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+  :focus{outline:none}
+  :focus-visible,.foco{outline:3px solid var(--oro)!important;outline-offset:2px}
+
+  /* Cabecera con franjas azul y blanco */
+  header{position:sticky;top:0;z-index:5;background:linear-gradient(180deg,var(--noche) 80%,transparent);padding:12px 16px 8px}
+  .marca{display:flex;align-items:center;gap:12px}
+  .logo{width:46px;height:46px;border-radius:12px;flex:none;object-fit:cover;box-shadow:0 0 0 2px #2a4fd0,0 0 14px rgba(60,110,255,.5)}
+  .marca h1{font-size:18px;line-height:1.1;font-weight:800}
+  .marca p{font-size:12px;color:var(--gris)}
+  .irplayer{flex:none;background:#111;border:1px solid #3dff6e;color:#3dff6e;font:800 13px "Courier New",monospace;padding:8px 12px;border-radius:8px;text-decoration:none;text-shadow:0 0 6px rgba(61,255,110,.6)}
+  .franja{height:4px;margin-top:10px;border-radius:2px;background:repeating-linear-gradient(90deg,var(--azul2) 0 22px,#fff 22px 44px);opacity:.85}
+
+  /* Reproductor */
+  .escenario{padding:0 16px}
+  .pantalla{position:relative;aspect-ratio:16/9;background:#000;border-radius:14px;overflow:hidden;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+  .pantalla.vertical{aspect-ratio:9/16;height:64vh;width:auto;max-width:100%;margin:0 auto}
+  .pantalla video,.pantalla iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+  .aviso{position:absolute;inset:0;display:grid;place-items:center;text-align:center;padding:20px;
+    background:radial-gradient(circle at 30% 20%,#1b3a8a,#06102a 70%);font-size:14px;color:var(--gris)}
+  .aviso b{display:block;color:var(--blanco);font-size:17px;margin-bottom:6px}
+  .ahora{display:flex;align-items:flex-start;gap:10px;padding:12px 2px 4px}
+  .ahora .txt{flex:1;min-width:0}
+  .ahora h2{font-size:17px}
+  .ahora p{font-size:13px;color:var(--gris);margin-top:2px}
+  .vivo{display:inline-flex;align-items:center;gap:5px;background:var(--rojo);color:#fff;font-size:11px;font-weight:800;padding:3px 7px;border-radius:5px;letter-spacing:.5px;vertical-align:2px;margin-right:6px}
+  .vivo::before{content:"";width:6px;height:6px;border-radius:50%;background:#fff;animation:late 1.2s infinite}
+  @keyframes late{50%{opacity:.25}}
+  .abrir{flex:none;align-self:center;background:#1ed760;color:#06210f;font-weight:800;font-size:13px;padding:7px 12px;border-radius:999px;text-decoration:none}
+  .abrir.tt{background:#111;color:#fff;box-shadow:inset 0 0 0 2px #fe2c55}
+  .abrir.yt{background:#ff2a2a;color:#fff}
+  .fav{font-size:22px;padding:4px 6px;border-radius:8px;color:var(--gris)}
+  .fav.on{color:var(--oro)}
+
+  /* Pestañas y búsqueda */
+  .controles{position:sticky;top:76px;z-index:4;background:var(--noche);padding:10px 16px 8px}
+  .pestanas{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+  .pestanas::-webkit-scrollbar{display:none}
+  .pestana{flex:none;padding:8px 14px;border-radius:999px;background:var(--panel);color:var(--gris);font-size:14px;font-weight:600}
+  .pestana.activa{background:var(--blanco);color:var(--azul)}
+  .buscar{margin-top:10px;width:100%;padding:10px 14px;border-radius:12px;border:1px solid #23376d;background:#0d1a3d;color:var(--blanco);font-size:15px}
+  .buscar::placeholder{color:#6f80ab}
+
+  /* Grilla de canales */
+  .grilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;padding:6px 16px 28px}
+  .tarjeta{text-align:left;background:var(--panel);border-radius:12px;overflow:hidden;transition:transform .15s}
+  .tarjeta:active{transform:scale(.97)}
+  .tarjeta.sonando{box-shadow:0 0 0 2px var(--blanco)}
+  .mini{position:relative;aspect-ratio:16/9;background:linear-gradient(135deg,var(--azul2),var(--azul));display:grid;place-items:center;font-size:30px;font-weight:900;color:rgba(255,255,255,.9)}
+  .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  .mini .vivo{position:absolute;top:6px;left:6px}
+  .mini .pend{position:absolute;bottom:6px;right:6px;font-size:10px;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:4px;color:var(--oro);font-weight:700}
+  .tarjeta .info{padding:8px 10px 10px}
+  .tarjeta h3{font-size:14px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tarjeta p{font-size:12px;color:var(--gris);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .vacio{grid-column:1/-1;text-align:center;color:var(--gris);padding:30px 10px;font-size:14px}
+
+  @media (min-width:900px){
+    main{display:grid;grid-template-columns:1.4fr 1fr;align-items:start}
+    .escenario{position:sticky;top:76px}
+    .controles{top:76px}
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="marca">
+    <img class="logo" src="logo.png" alt="Ritmo de Tribuna">
+    <div style="flex:1"><h1 id="nombre">Ritmo de Tribuna TV</h1><p id="subtitulo"></p></div>
+    <a href="reproductor.html" class="irplayer">🎧 Player</a>
+  </div>
+  <div class="franja"></div>
+</header>
+
+<main>
+  <section class="escenario">
+    <div class="pantalla" id="pantalla">
+      <div class="aviso"><div><b>Elige un canal</b>Toca cualquier tarjeta para empezar</div></div>
+    </div>
+    <div class="ahora">
+      <div class="txt"><h2 id="ahoraTitulo">Bienvenido</h2><p id="ahoraDesc">Música, videoclips y transmisiones en vivo.</p></div>
+      <a class="abrir" id="ahoraAbrir" href="#" hidden>Abrir app ↗</a>
+      <button class="fav" id="ahoraFav" aria-label="Favorito" hidden>☆</button>
+    </div>
+  </section>
+
+  <section>
+    <div class="controles">
+      <nav class="pestanas" id="pestanas"></nav>
+      <input class="buscar" id="buscar" type="search" placeholder="Buscar canal o video…" autocomplete="off">
+    </div>
+    <div class="grilla" id="grilla"></div>
+  </section>
+</main>
+
+<script src="canales.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  let CFG = window.RDT_CONFIG || {categorias:[],canales:[]};
+  let actual = null, categoria = "todo", texto = "";
+
+  /* ---------- almacenamiento seguro de favoritos ---------- */
+  function leerFavs(){ try{ return JSON.parse(localStorage.getItem("rdt_favs")||"[]"); }catch(e){ return []; } }
+  function guardarFavs(f){ try{ localStorage.setItem("rdt_favs", JSON.stringify(f)); }catch(e){} }
+  let favs = leerFavs();
+  const esFav = id => favs.includes(id);
+  function toggleFav(id){ favs = esFav(id) ? favs.filter(x=>x!==id) : favs.concat(id); guardarFavs(favs); pintar(); pintarAhora(); }
+
+  const pendiente = c => !c.fuente || /^PON_AQUI/i.test(c.fuente);
+  const esc = s => String(s||"").replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]));
+  const iniciales = n => n.split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0]).join("").toUpperCase();
+
+  /* ---------- pestañas ---------- */
+  function pintarPestanas(){
+    const tabs = [{id:"todo",nombre:"Todo"}].concat(CFG.categorias||[], [{id:"favs",nombre:"★ Favoritos"}]);
+    $("#pestanas").innerHTML = tabs.map(t=>`<button class="pestana${t.id===categoria?" activa":""}" data-cat="${esc(t.id)}">${esc(t.nombre)}</button>`).join("");
+  }
+  $("#pestanas").addEventListener("click", e=>{
+    const b = e.target.closest(".pestana"); if(!b) return;
+    categoria = b.dataset.cat; pintarPestanas(); pintar();
+  });
+  $("#buscar").addEventListener("input", e=>{ texto = e.target.value.trim().toLowerCase(); pintar(); });
+
+  /* ---------- grilla ---------- */
+  function miniatura(c){
+    if((c.tipo==="youtube") && !pendiente(c))
+      return `<img loading="lazy" alt="" src="https://i.ytimg.com/vi/${encodeURIComponent(c.fuente)}/hqdefault.jpg" onerror="this.remove()">`;
+    if(c.tipo==="spotify") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#1ed760,#0b5d2a);font-size:15px;letter-spacing:1px">SPOTIFY</span>`;
+    if(c.tipo==="tiktok") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#111 30%,#25f4ee 140%);box-shadow:inset -6px 0 0 #fe2c55;font-size:14px;letter-spacing:1px">♪ TIKTOK</span>`;
+    if(c.tipo==="playlist") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#ff2a2a,#7a0010);font-size:14px;letter-spacing:1px">▶ PLAYLIST</span>`;
+    if(c.imagen) return `<img loading="lazy" alt="" src="${esc(c.imagen)}" onerror="this.remove()">`;
+    return "";
+  }
+  function pintar(){
+    let lista = CFG.canales||[];
+    if(categoria==="favs") lista = lista.filter(c=>esFav(c.id));
+    else if(categoria!=="todo") lista = lista.filter(c=>c.categoria===categoria);
+    if(texto) lista = lista.filter(c=>(c.nombre+" "+(c.descripcion||"")).toLowerCase().includes(texto));
+    $("#grilla").innerHTML = lista.length ? lista.map(c=>`
+      <button class="tarjeta${actual&&actual.id===c.id?" sonando":""}" data-id="${esc(c.id)}">
+        <div class="mini">${esc(iniciales(c.nombre))}${miniatura(c)}
+          ${c.envivo?'<span class="vivo">EN VIVO</span>':""}
+          ${pendiente(c)?'<span class="pend">POR CONFIGURAR</span>':""}
+        </div>
+        <div class="info"><h3>${esFav(c.id)?"★ ":""}${esc(c.nombre)}</h3><p>${esc(c.descripcion||"")}</p></div>
+      </button>`).join("")
+      : `<div class="vacio">${categoria==="favs"?"Aún no tienes favoritos. Toca ☆ en un canal para guardarlo.":"No hay canales aquí todavía."}</div>`;
+  }
+  $("#grilla").addEventListener("click", e=>{
+    const t = e.target.closest(".tarjeta"); if(!t) return;
+    const c = (CFG.canales||[]).find(x=>x.id===t.dataset.id); if(c) reproducir(c);
+  });
+
+  /* ---------- reproductor ---------- */
+  function aviso(titulo, txt){ $("#pantalla").innerHTML = `<div class="aviso"><div><b>${esc(titulo)}</b>${esc(txt)}</div></div>`; }
+  function pintarAhora(){
+    if(!actual) return;
+    $("#ahoraTitulo").innerHTML = (actual.envivo?'<span class="vivo">EN VIVO</span>':"") + esc(actual.nombre);
+    $("#ahoraDesc").textContent = actual.descripcion||"";
+    const a = $("#ahoraAbrir");
+    if(actual.abrir){ a.hidden=false; a.href=actual.abrir; a.textContent=actual.textoAbrir||"Abrir ↗"; a.classList.toggle("yt", /youtube/.test(actual.abrir)); a.classList.toggle("tt", /tiktok/.test(actual.abrir)); }
+    else a.hidden=true;
+    const f = $("#ahoraFav"); f.hidden = false;
+    f.textContent = esFav(actual.id) ? "★" : "☆"; f.classList.toggle("on", esFav(actual.id));
+  }
+  $("#ahoraFav").addEventListener("click", ()=> actual && toggleFav(actual.id));
+
+  let hlsInst = null;
+  function limpiar(){ $("#pantalla").classList.remove("vertical"); if(hlsInst){ try{hlsInst.destroy();}catch(e){} hlsInst=null; } $("#pantalla").innerHTML=""; }
+
+  function reproducir(c){
+    actual = c; limpiar(); pintarAhora(); pintar();
+    window.scrollTo({top:0,behavior:"smooth"});
+    if(pendiente(c)) return aviso("Canal por configurar", "Edita canales.js y pon el ID o la URL de este contenido.");
+    const p = $("#pantalla");
+    p.classList.toggle("vertical", c.tipo==="tiktok");
+    if(c.tipo==="tiktok"){
+      p.innerHTML = `<iframe src="https://www.tiktok.com/player/v1/${encodeURIComponent(c.fuente)}?autoplay=1&loop=0&music_info=1&description=1&rel=0" allow="autoplay; fullscreen; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+      return;
+    }
+    if(c.tipo==="spotify"){
+      p.innerHTML = `<iframe src="https://open.spotify.com/embed/${c.fuente}?utm_source=generator&theme=0" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" style="background:#121212"></iframe>`;
+      return;
+    }
+    if(c.tipo==="youtube" || c.tipo==="youtube-live" || c.tipo==="playlist"){
+      const src = c.tipo==="youtube"
+        ? `https://www.youtube.com/embed/${encodeURIComponent(c.fuente)}?autoplay=1&playsinline=1&rel=0&modestbranding=1`
+        : c.tipo==="playlist"
+        ? `https://www.youtube.com/embed/videoseries?list=${encodeURIComponent(c.fuente)}&autoplay=1&playsinline=1&rel=0`
+        : `https://www.youtube.com/embed/live_stream?channel=${encodeURIComponent(c.fuente)}&autoplay=1&playsinline=1`;
+      p.innerHTML = `<iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>`;
+      return;
+    }
+    const v = document.createElement("video");
+    v.controls = true; v.autoplay = true; v.playsInline = true; v.setAttribute("playsinline","");
+    v.onerror = ()=> aviso("No se pudo reproducir", c.envivo ? "La transmisión está apagada o la URL no responde." : "Revisa la URL del video.");
+    p.appendChild(v);
+    if(c.tipo==="hls"){
+      if(v.canPlayType("application/vnd.apple.mpegurl")){ v.src = c.fuente; }
+      else cargarHls(()=>{
+        if(window.Hls && Hls.isSupported()){ hlsInst = new Hls(); hlsInst.loadSource(c.fuente); hlsInst.attachMedia(v);
+          hlsInst.on(Hls.Events.ERROR,(e,d)=>{ if(d.fatal) v.onerror(); }); }
+        else v.src = c.fuente;
+      });
+    } else v.src = c.fuente;
+    const pr = v.play && v.play(); if(pr && pr.catch) pr.catch(()=>{});
+  }
+  function cargarHls(cb){
+    if(window.Hls) return cb();
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/hls.js@1/dist/hls.min.js";
+    s.onload = cb; s.onerror = cb; document.head.appendChild(s);
+  }
+
+  /* ---------- navegación con control remoto (Android TV) ---------- */
+  document.addEventListener("keydown", e=>{
+    const dirs = {ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]};
+    const d = dirs[e.key]; if(!d) return;
+    const a = document.activeElement;
+    if(a && a.id==="buscar" && d[0]!==0) return;
+    const items = [...document.querySelectorAll("button:not([hidden]),input")].filter(el=>el.offsetParent);
+    if(!a || !items.includes(a)){ (items.find(x=>x.classList.contains("tarjeta"))||items[0])?.focus(); e.preventDefault(); return; }
+    const r = a.getBoundingClientRect(), cx = r.left+r.width/2, cy = r.top+r.height/2;
+    let mejor=null, md=Infinity;
+    for(const el of items){ if(el===a) continue;
+      const q = el.getBoundingClientRect(), x = q.left+q.width/2-cx, y = q.top+q.height/2-cy;
+      if(d[0] && Math.sign(x)!==d[0]) continue; if(d[1] && Math.sign(y)!==d[1]) continue;
+      if(d[0] && Math.abs(x)<4) continue; if(d[1] && Math.abs(y)<4) continue;
+      const dist = d[0] ? Math.abs(x)+Math.abs(y)*3 : Math.abs(y)+Math.abs(x)*3;
+      if(dist<md){ md=dist; mejor=el; } }
+    if(mejor){ mejor.focus(); mejor.scrollIntoView({block:"nearest",behavior:"smooth"}); e.preventDefault(); }
+  });
+
+  /* ---------- arranque ---------- */
+  function iniciar(){
+    $("#nombre").textContent = CFG.nombre||"Ritmo de Tribuna TV";
+    $("#subtitulo").textContent = CFG.subtitulo||"";
+    pintarPestanas(); pintar();
+  }
+  iniciar();
+  if(CFG.urlRemota){
+    fetch(CFG.urlRemota+(CFG.urlRemota.includes("?")?"&":"?")+"t="+Date.now())
+      .then(r=>r.json()).then(j=>{ CFG = Object.assign({}, CFG, j); iniciar(); })
+      .catch(()=>{});
+  }
+  /* Botón "atrás" de Android: si hay algo sonando, primero lo detiene */
+  window.rdtAtras = function(){ if(actual){ actual=null; limpiar(); aviso("Elige un canal","Toca cualquier tarjeta para empezar"); $("#ahoraFav").hidden=true; $("#ahoraAbrir").hidden=true; $("#ahoraTitulo").textContent="Bienvenido"; $("#ahoraDesc").textContent="Música, videoclips y transmisiones en vivo."; pintar(); return true; } return false; };
+})();
+</script>
+</body>
+</html>
