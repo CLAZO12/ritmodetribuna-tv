@@ -97,8 +97,52 @@
         u.textContent = "⬆ Hay una versión nueva de la app (" + (info.nombre || "v" + info.version) + "): toca aquí para actualizar";
       } else if(u) u.remove();
     }catch(e){}
-    if(DUENO) panelDueno();
+    if(DUENO) panelDueno(); else puerta(CFG);
   };
+
+  /* ---------- 5) CLAVE DE FAN (solo versión Fans) ----------
+     En canales.js: "claves": ["<sha256 de la clave en MAYÚSCULAS>", ...]. Lista vacía = app abierta para todos. */
+  async function huella(t){
+    const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(String(t || "").trim().toUpperCase()));
+    return [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, "0")).join("");
+  }
+  async function puerta(CFG){
+    const claves = (CFG.claves || []).map(x => String(x).toLowerCase());
+    let p = document.getElementById("rdtPuerta");
+    const quitar = () => { if(p) p.remove(); document.documentElement.style.overflow = ""; };
+    if(!claves.length || !(window.crypto && crypto.subtle)) return quitar();
+    let guardada = ""; try{ guardada = localStorage.getItem("rdt_clave") || ""; }catch(e){}
+    if(guardada && claves.includes(await huella(guardada))) return quitar();
+    try{ window.rdtAtras && window.rdtAtras(); }catch(e){}
+    if(!p){
+      p = document.createElement("div"); p.id = "rdtPuerta";
+      p.style.cssText = "position:fixed;inset:0;z-index:99999;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 50% 25%,#1d4fd8,#071a3d 70%);color:#fff;font:16px system-ui;text-align:center";
+      p.innerHTML = `<div style="max-width:520px;width:100%">
+        <div style="font-size:54px">🎺</div>
+        <div style="font:900 30px system-ui;letter-spacing:.5px">RITMO DE TRIBUNA TV</div>
+        <div style="opacity:.85;margin:6px 0 18px">App exclusiva para los fans de DJ Carlos Bazo</div>
+        <input id="rdtClave" placeholder="Escribe tu clave de fan" autocomplete="off" autocapitalize="characters"
+          style="width:100%;box-sizing:border-box;padding:14px;border-radius:12px;border:2px solid #7fb0ff;background:#071330;color:#fff;font:800 20px system-ui;text-align:center;letter-spacing:2px">
+        <button id="rdtClaveOk" style="margin-top:12px;width:100%;padding:14px;border:0;border-radius:12px;background:#fff;color:#0a2a7a;font:900 18px system-ui">ENTRAR</button>
+        <div id="rdtClaveMsg" style="min-height:22px;margin-top:10px;color:#ffd84d"></div>
+        <div style="margin-top:14px;opacity:.85;font-size:14px">¿No tienes clave? Pídela en mis lives:</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:8px;font-size:14px">
+          <a href="https://www.tiktok.com/@ritmodetribuna" style="color:#fff;background:#111;padding:8px 12px;border-radius:999px;text-decoration:none">TikTok @ritmodetribuna</a>
+          <a href="https://www.youtube.com/@RitmoDeTribuna" style="color:#fff;background:#e0102a;padding:8px 12px;border-radius:999px;text-decoration:none">YouTube @RitmoDeTribuna</a>
+          <a href="https://open.spotify.com/artist/3UfsHgWx8pKJIc22zsO9xv" style="color:#fff;background:#1db954;padding:8px 12px;border-radius:999px;text-decoration:none">Spotify</a>
+        </div></div>`;
+      document.body.appendChild(p);
+      const inp = p.querySelector("#rdtClave"), msg = p.querySelector("#rdtClaveMsg");
+      const probar = async () => {
+        if(claves.includes(await huella(inp.value))){ try{ localStorage.setItem("rdt_clave", inp.value.trim().toUpperCase()); }catch(e){} msg.textContent = "✓ ¡Bienvenido a la tribuna!"; setTimeout(quitar, 500); }
+        else { msg.textContent = "Clave incorrecta. Revisa y vuelve a intentar."; inp.select(); }
+      };
+      p.querySelector("#rdtClaveOk").onclick = probar;
+      inp.addEventListener("keydown", e => { if(e.key === "Enter") probar(); });
+    }
+    document.documentElement.style.overflow = "hidden";
+    setTimeout(() => { const i = document.getElementById("rdtClave"); i && i.focus(); }, 300);
+  }
 
   /* ---------- 4) panel DUEÑO: listas M3U privadas + IP del Tribuna Deck ---------- */
   function texto(url){

@@ -1043,5 +1043,8 @@ window.RDT_CONFIG = {
       "nombre": "v1.1",
       "url": ""
     }
-  }
+  },
+  "claves": [
+    "bd24c3d123b16b97841f83a85f4a6a10202332fea2f0ef135288138388651171"
+  ]
 };
