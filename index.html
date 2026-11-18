@@ -66,6 +66,28 @@
   .mini .vivo{position:absolute;top:6px;left:6px}
   .mini .pend{position:absolute;bottom:6px;right:6px;font-size:10px;background:rgba(0,0,0,.6);padding:2px 6px;border-radius:4px;color:var(--oro);font-weight:700}
   .tarjeta .info{padding:8px 10px 10px}
+  /* inicio estilo Netflix */
+  .grilla.inicio{display:block}
+  .fila{margin:4px 0 16px}
+  .fila h4{margin:0 0 8px 2px;font-size:17px;font-weight:800;color:#fff}
+  .carril{display:flex;gap:12px;overflow-x:auto;padding:4px 2px 10px;scroll-snap-type:x proximity;scrollbar-width:none}
+  .carril::-webkit-scrollbar{display:none}
+  .carril .tarjeta{flex:0 0 clamp(150px,22vw,230px);scroll-snap-align:start}
+  .destacado{position:relative;display:block;width:100%;margin:0 0 18px;border-radius:16px;overflow:hidden;background:var(--panel)}
+  .destacado .mini{aspect-ratio:21/8;font-size:0}
+  .destacado .mini img{object-fit:cover}
+  .destacado .dtxt{position:absolute;inset:auto 0 0 0;padding:18px 22px;background:linear-gradient(0deg,rgba(5,12,32,.95),rgba(5,12,32,0));text-align:left}
+  .destacado .dtxt span{font-size:12px;letter-spacing:2px;color:#9fc0ff;font-weight:800}
+  .destacado .dtxt h2{margin:4px 0;font-size:clamp(20px,3vw,32px)}
+  .destacado .dtxt p{margin:0 0 8px;color:#cfdcff;font-size:14px}
+  .destacado .dtxt b{display:inline-block;background:#fff;color:var(--azul);padding:7px 14px;border-radius:999px;font-size:14px}
+  .perfilBtn{background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:7px 12px;font-weight:800;font-size:14px;margin-right:10px}
+  #perfiles{position:fixed;inset:0;z-index:99990;display:grid;place-items:center;background:radial-gradient(circle at 50% 25%,#1d4fd8,#071a3d 70%);text-align:center}
+  #perfiles h2{font-size:30px;margin:0 0 22px}
+  #perfiles .lp{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;max-width:900px}
+  #perfiles .lp button{width:130px;padding:16px 8px;border-radius:18px;background:rgba(255,255,255,.08);color:#fff;font-weight:800;font-size:16px;border:2px solid transparent}
+  #perfiles .lp button:focus,#perfiles .lp button:hover{border-color:#fff;transform:scale(1.06)}
+  #perfiles .lp i{display:block;font-style:normal;font-size:52px;margin-bottom:8px}
   .tarjeta h3{font-size:14px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .tarjeta p{font-size:12px;color:var(--gris);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .vacio{grid-column:1/-1;text-align:center;color:var(--gris);padding:30px 10px;font-size:14px}
@@ -117,6 +139,7 @@
   <div class="marca">
     <img class="logo" src="logo.png" alt="Ritmo de Tribuna">
     <div style="flex:1"><h1 id="nombre">Ritmo de Tribuna TV</h1><p id="subtitulo"></p></div>
+    <button class="perfilBtn" id="perfilBtn">🏠 Familia</button>
     <a href="reproductor.html" class="irplayer">🎧 Player</a>
   </div>
   <div class="franja"></div>
@@ -158,8 +181,13 @@
   let actual = null, categoria = "todo", texto = "";
 
   /* ---------- almacenamiento seguro de favoritos ---------- */
-  function leerFavs(){ try{ return JSON.parse(localStorage.getItem("rdt_favs")||"[]"); }catch(e){ return []; } }
-  function guardarFavs(f){ try{ localStorage.setItem("rdt_favs", JSON.stringify(f)); }catch(e){} }
+  /* ---------- perfiles (cada uno con sus favoritos; se guardan solo en este aparato) ---------- */
+  const LS = { get: k => { try{ return localStorage.getItem(k); }catch(e){ return null; } }, set: (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} } };
+  function perfiles(){ try{ const p = JSON.parse(LS.get("rdt_perfiles")||"null"); if(Array.isArray(p) && p.length) return p; }catch(e){} return [{ id:"p0", nombre:"Familia", icono:"🏠" }]; }
+  let perfil = perfiles().find(p=>p.id===LS.get("rdt_perfil")) || perfiles()[0];
+  const claveFavs = () => perfil.id==="p0" ? "rdt_favs" : "rdt_favs_" + perfil.id;
+  function leerFavs(){ try{ return JSON.parse(LS.get(claveFavs())||"[]"); }catch(e){ return []; } }
+  function guardarFavs(f){ LS.set(claveFavs(), JSON.stringify(f)); }
   let favs = leerFavs();
   const esFav = id => favs.includes(id);
   function toggleFav(id){ favs = esFav(id) ? favs.filter(x=>x!==id) : favs.concat(id); guardarFavs(favs); pintar(); pintarAhora(); }
@@ -191,7 +219,28 @@
     if(c.imagen) return `<img loading="lazy" alt="" src="${esc(c.imagen)}" onerror="this.remove()">`;
     return "";
   }
+  function tarjetaHTML(c){
+    return `<button class="tarjeta${actual&&actual.id===c.id?" sonando":""}" data-id="${esc(c.id)}">
+        <div class="mini">${esc(iniciales(c.nombre))}${miniatura(c)}
+          ${c.envivo?'<span class="vivo">EN VIVO</span>':""}
+        </div>
+        <div class="info"><h3>${esFav(c.id)?"★ ":""}${esc(c.nombre)}</h3><p>${esc(c.descripcion||"")}</p></div>
+      </button>`;
+  }
+  function pintarInicio(){
+    const todos = (CFG.canales||[]).filter(c=>!pendiente(c));
+    const dest = todos.find(c=>c.id===CFG.destacado) || todos.find(c=>c.categoria==="estrenos") || todos.find(c=>c.tipo==="youtube") || todos[0];
+    const filas = [];
+    const favL = todos.filter(c=>esFav(c.id)); if(favL.length) filas.push(["★ Mis favoritos de " + perfil.nombre, favL]);
+    (CFG.categorias||[]).forEach(k=>{ const l = todos.filter(c=>c.categoria===k.id); if(l.length) filas.push([k.nombre, l]); });
+    $("#grilla").classList.add("inicio");
+    $("#grilla").innerHTML = (dest ? `<button class="tarjeta destacado" data-id="${esc(dest.id)}"><div class="mini">${miniatura(dest)}</div>
+        <div class="dtxt"><span>DESTACADO</span><h2>${esc(dest.nombre)}</h2><p>${esc(dest.descripcion||"")}</p><b>▶ Ver ahora</b></div></button>` : "")
+      + filas.map(([n, l])=>`<section class="fila"><h4>${esc(n)}</h4><div class="carril">${l.slice(0, 30).map(tarjetaHTML).join("")}</div></section>`).join("");
+  }
   function pintar(){
+    $("#grilla").classList.remove("inicio");
+    if(categoria==="todo" && !texto) return pintarInicio();
     let lista = CFG.canales||[];
     if(categoria==="favs") lista = lista.filter(c=>esFav(c.id));
     else if(categoria!=="todo") lista = lista.filter(c=>c.categoria===categoria);
@@ -302,6 +351,7 @@
     $("#nombre").textContent = CFG.nombre||"Ritmo de Tribuna TV";
     $("#subtitulo").textContent = CFG.subtitulo||"";
     CFG = window.rdtPrep ? window.rdtPrep(BASE) : BASE;
+    $("#perfilBtn").textContent = perfil.icono + " " + perfil.nombre;
     pintarPestanas(); pintar();
     try{ window.rdtIniciado && window.rdtIniciado(CFG); }catch(e){}
   }
@@ -339,7 +389,36 @@
     else return;
     e.preventDefault(); e.stopImmediatePropagation();
   }, true);
-  window.rdtAtras = function(){ if(document.body.classList.contains("full")){ pantallaCompleta(false); return true; } if(actual){ actual=null; limpiar(); aviso("Elige un canal","Toca cualquier tarjeta para empezar"); $("#ahoraFav").hidden=true; $("#ahoraAbrir").hidden=true; $("#ahoraTitulo").textContent="Bienvenido"; $("#ahoraDesc").textContent="Música, videoclips y transmisiones en vivo."; pintar(); return true; } return false; };
+  /* ---------- elegir / crear perfil ---------- */
+  const ICONOS = ["🏠","👨","👩","🧒","👴","👵","⚽","🎺","💙","🎧"];
+  function elegirPerfil(){
+    let v = document.getElementById("perfiles"); if(v) v.remove();
+    v = document.createElement("div"); v.id = "perfiles";
+    const ps = perfiles();
+    v.innerHTML = `<div><h2>¿Quién está viendo?</h2><div class="lp">${ps.map(p=>`<button data-p="${esc(p.id)}"><i>${p.icono}</i>${esc(p.nombre)}</button>`).join("")}
+      ${ps.length < 6 ? `<button data-p="nuevo"><i>＋</i>Nuevo perfil</button>` : ""}</div>
+      ${ps.length > 1 ? `<p style="margin-top:20px;opacity:.75;font-size:14px">Para borrar un perfil, elígelo y escribe su nombre con un «-» delante al crear uno nuevo (ej. -Hijo).</p>` : ""}</div>`;
+    document.body.appendChild(v);
+    v.addEventListener("click", e=>{
+      const b = e.target.closest("button"); if(!b) return;
+      let lista = perfiles();
+      if(b.dataset.p==="nuevo"){
+        const n = (prompt("Nombre del perfil (ej. Papá, Hijo, Invitado):")||"").trim().slice(0, 16); if(!n) return;
+        if(n.startsWith("-")){ const q = n.slice(1).trim().toLowerCase(); lista = lista.filter(p=>p.id==="p0" || p.nombre.toLowerCase()!==q); LS.set("rdt_perfiles", JSON.stringify(lista)); return elegirPerfil(); }
+        const np = { id:"p" + Date.now().toString(36), nombre:n, icono:ICONOS[lista.length % ICONOS.length] };
+        lista = lista.concat(np); LS.set("rdt_perfiles", JSON.stringify(lista)); return elegirPerfil();
+      }
+      perfil = lista.find(p=>p.id===b.dataset.p) || lista[0]; LS.set("rdt_perfil", perfil.id);
+      favs = leerFavs(); $("#perfilBtn").textContent = perfil.icono + " " + perfil.nombre;
+      v.remove(); pintar(); pintarAhora();
+      const t = document.querySelector(".tarjeta"); if(t) t.focus();
+    });
+    setTimeout(()=>{ const b = v.querySelector("button"); if(b) b.focus(); }, 100);
+  }
+  $("#perfilBtn").addEventListener("click", elegirPerfil);
+  if(perfiles().length > 1) setTimeout(elegirPerfil, 300);
+
+  window.rdtAtras = function(){ const pv = document.getElementById("perfiles"); if(pv){ pv.remove(); return true; } if(document.body.classList.contains("full")){ pantallaCompleta(false); return true; } if(actual){ actual=null; limpiar(); aviso("Elige un canal","Toca cualquier tarjeta para empezar"); $("#ahoraFav").hidden=true; $("#ahoraAbrir").hidden=true; $("#ahoraTitulo").textContent="Bienvenido"; $("#ahoraDesc").textContent="Música, videoclips y transmisiones en vivo."; pintar(); return true; } return false; };
 })();
 </script>
 </body>
