@@ -1,0 +1,346 @@
+{
+ "artista": "Ritmo de Tribuna",
+ "base": "https://github.com/CLAZO12/ritmodetribuna-tv/releases/download/musica/",
+ "albumes": [
+  {
+   "nombre": "Alma Tribunera",
+   "portada": "portada-alma-tribunera.jpg",
+   "canciones": [
+    {
+     "n": 1,
+     "titulo": "Alejandro Villanueva",
+     "archivo": "alma-tribunera-01-alejandro-villanueva.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 382
+    },
+    {
+     "n": 2,
+     "titulo": "Alianza Lima sin Fronteras",
+     "archivo": "alma-tribunera-02-alianza-lima-sin-fronteras.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 252
+    },
+    {
+     "n": 3,
+     "titulo": "Amor Eterno",
+     "archivo": "alma-tribunera-03-amor-eterno.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 220
+    },
+    {
+     "n": 4,
+     "titulo": "Amor Verdadero",
+     "archivo": "alma-tribunera-04-amor-verdadero.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 307
+    },
+    {
+     "n": 5,
+     "titulo": "Ao to Shiro no Hokori (Orgullo Blanquiazul)",
+     "archivo": "alma-tribunera-05-ao-to-shiro-no-hokori-orgullo-blanquiazul.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 168
+    },
+    {
+     "n": 6,
+     "titulo": "Caminito Íntimo",
+     "archivo": "alma-tribunera-06-caminito-intimo.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 302
+    },
+    {
+     "n": 7,
+     "titulo": "Gracias Papá AL",
+     "archivo": "alma-tribunera-07-gracias-papa-al.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 274
+    },
+    {
+     "n": 8,
+     "titulo": "Hasta que Dios me Lleve",
+     "archivo": "alma-tribunera-08-hasta-que-dios-me-lleve.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 284
+    },
+    {
+     "n": 9,
+     "titulo": "Las Mañanitas Blanquiazul",
+     "archivo": "alma-tribunera-09-las-mananitas-blanquiazul.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 213
+    },
+    {
+     "n": 10,
+     "titulo": "Llegó el Sábado",
+     "archivo": "alma-tribunera-10-llego-el-sabado.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 200
+    },
+    {
+     "n": 11,
+     "titulo": "Mi Única Pasión",
+     "archivo": "alma-tribunera-11-mi-unica-pasion.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 183
+    },
+    {
+     "n": 12,
+     "titulo": "Potrillos del 87",
+     "archivo": "alma-tribunera-12-potrillos-del-87.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 230
+    },
+    {
+     "n": 13,
+     "titulo": "Te Extraño AL",
+     "archivo": "alma-tribunera-13-te-extrano-al.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 262
+    },
+    {
+     "n": 14,
+     "titulo": "Vamos Alianza",
+     "archivo": "alma-tribunera-14-vamos-alianza.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 117
+    },
+    {
+     "n": 15,
+     "titulo": "Volvió la Alegría",
+     "archivo": "alma-tribunera-15-volvio-la-alegria.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 144
+    },
+    {
+     "n": 16,
+     "titulo": "Yo te quiero ver Campeón",
+     "archivo": "alma-tribunera-16-yo-te-quiero-ver-campeon.mp3",
+     "portada": "portada-alma-tribunera.jpg",
+     "dur": 236
+    }
+   ]
+  },
+  {
+   "nombre": "Ritmo de Tribuna",
+   "portada": "portada-ritmo-de-tribuna.jpg",
+   "canciones": [
+    {
+     "n": 1,
+     "titulo": "Arriba Alianza TLV",
+     "archivo": "ritmo-de-tribuna-01-arriba-alianza-tlv.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 240
+    },
+    {
+     "n": 2,
+     "titulo": "Blanquiazul Flow",
+     "archivo": "ritmo-de-tribuna-02-blanquiazul-flow.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 137
+    },
+    {
+     "n": 3,
+     "titulo": "Cumbia Blanquiazul",
+     "archivo": "ritmo-de-tribuna-03-cumbia-blanquiazul.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 269
+    },
+    {
+     "n": 4,
+     "titulo": "Desde Huacho a Matute",
+     "archivo": "ritmo-de-tribuna-04-desde-huacho-a-matute.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 196
+    },
+    {
+     "n": 5,
+     "titulo": "Eterno Amor",
+     "archivo": "ritmo-de-tribuna-05-eterno-amor.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 244
+    },
+    {
+     "n": 6,
+     "titulo": "Fe y Pasión",
+     "archivo": "ritmo-de-tribuna-06-fe-y-pasion.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 302
+    },
+    {
+     "n": 7,
+     "titulo": "Hasta la Eternidad",
+     "archivo": "ritmo-de-tribuna-07-hasta-la-eternidad.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 256
+    },
+    {
+     "n": 8,
+     "titulo": "Hijos del Corazón",
+     "archivo": "ritmo-de-tribuna-08-hijos-del-corazon.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 277
+    },
+    {
+     "n": 9,
+     "titulo": "Jarana en el Cielo",
+     "archivo": "ritmo-de-tribuna-09-jarana-en-el-cielo.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 240
+    },
+    {
+     "n": 10,
+     "titulo": "La Caldera Matute",
+     "archivo": "ritmo-de-tribuna-10-la-caldera-matute.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 211
+    },
+    {
+     "n": 11,
+     "titulo": "La Noche Blanquiazul [Reparto]",
+     "archivo": "ritmo-de-tribuna-11-la-noche-blanquiazul-reparto.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 204
+    },
+    {
+     "n": 12,
+     "titulo": "Mi Primer Amor",
+     "archivo": "ritmo-de-tribuna-12-mi-primer-amor.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 239
+    },
+    {
+     "n": 13,
+     "titulo": "Mujer Blanquiazul",
+     "archivo": "ritmo-de-tribuna-13-mujer-blanquiazul.mp3",
+     "portada": "portada-mujer-blanquiazul.jpg",
+     "dur": 303
+    },
+    {
+     "n": 14,
+     "titulo": "Oh oh oh Comando Sur",
+     "archivo": "ritmo-de-tribuna-14-oh-oh-oh-comando-sur.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 254
+    },
+    {
+     "n": 15,
+     "titulo": "Ritual Íntimo",
+     "archivo": "ritmo-de-tribuna-15-ritual-intimo.mp3",
+     "portada": "portada-ritual-intimo.jpg",
+     "dur": 233
+    },
+    {
+     "n": 16,
+     "titulo": "Rumbo al Sentimiento",
+     "archivo": "ritmo-de-tribuna-16-rumbo-al-sentimiento.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 270
+    },
+    {
+     "n": 17,
+     "titulo": "Se Acabóooo Guerrero",
+     "archivo": "ritmo-de-tribuna-17-se-acaboooo-guerrero.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 237
+    },
+    {
+     "n": 18,
+     "titulo": "Somos Campeones",
+     "archivo": "ritmo-de-tribuna-18-somos-campeones.mp3",
+     "portada": "portada-ritmo-de-tribuna.jpg",
+     "dur": 229
+    }
+   ]
+  },
+  {
+   "nombre": "Una Pasión, Mil Canciones",
+   "portada": "portada-una-pasion-mil-canciones.jpg",
+   "canciones": [
+    {
+     "n": 1,
+     "titulo": "Activa Blanquiazul",
+     "archivo": "una-pasion-mil-canciones-01-activa-blanquiazul.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 187
+    },
+    {
+     "n": 2,
+     "titulo": "Blanquiazul Toda la Vida",
+     "archivo": "una-pasion-mil-canciones-02-blanquiazul-toda-la-vida.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 240
+    },
+    {
+     "n": 3,
+     "titulo": "Compañero de Esta Vida",
+     "archivo": "una-pasion-mil-canciones-03-companero-de-esta-vida.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 150
+    },
+    {
+     "n": 4,
+     "titulo": "Eres Mi Medio Corazón",
+     "archivo": "una-pasion-mil-canciones-04-eres-mi-medio-corazon.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 179
+    },
+    {
+     "n": 5,
+     "titulo": "Fiesta Blanquiazul",
+     "archivo": "una-pasion-mil-canciones-05-fiesta-blanquiazul.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 183
+    },
+    {
+     "n": 6,
+     "titulo": "La Ley del Perro Muerto",
+     "archivo": "una-pasion-mil-canciones-06-la-ley-del-perro-muerto.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 185
+    },
+    {
+     "n": 7,
+     "titulo": "La Segunda Para Messi",
+     "archivo": "una-pasion-mil-canciones-07-la-segunda-para-messi.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 168
+    },
+    {
+     "n": 8,
+     "titulo": "La Vida que Elegí",
+     "archivo": "una-pasion-mil-canciones-08-la-vida-que-elegi.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 179
+    },
+    {
+     "n": 9,
+     "titulo": "Las Íntimas",
+     "archivo": "una-pasion-mil-canciones-09-las-intimas.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 180
+    },
+    {
+     "n": 10,
+     "titulo": "Lo mejor de mi vida",
+     "archivo": "una-pasion-mil-canciones-10-lo-mejor-de-mi-vida.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 84
+    },
+    {
+     "n": 11,
+     "titulo": "Salsa Timba del Hincha",
+     "archivo": "una-pasion-mil-canciones-11-salsa-timba-del-hincha.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 320
+    },
+    {
+     "n": 12,
+     "titulo": "Señores, Soy de Alianza Lima",
+     "archivo": "una-pasion-mil-canciones-12-senores-soy-de-alianza-lima.mp3",
+     "portada": "portada-una-pasion-mil-canciones.jpg",
+     "dur": 126
+    }
+   ]
+  }
+ ]
+}
