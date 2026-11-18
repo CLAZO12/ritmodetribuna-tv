@@ -17,6 +17,10 @@ window.RDT_CONFIG = {
       "nombre": "En vivo"
     },
     {
+      "id": "radio",
+      "nombre": "📻 Radio 24/7"
+    },
+    {
       "id": "musica",
       "nombre": "Música"
     },
@@ -43,6 +47,10 @@ window.RDT_CONFIG = {
     {
       "id": "clips",
       "nombre": "Videoclips"
+    },
+    {
+      "id": "sets",
+      "nombre": "🎧 Sets DJ"
     }
   ],
   "canales": [
@@ -54,6 +62,25 @@ window.RDT_CONFIG = {
       "tipo": "youtube-live",
       "fuente": "UCY3OjJioibg2IrIPgh4QTUQ",
       "envivo": true
+    },
+    {
+      "id": "radio247",
+      "nombre": "Radio Ritmo de Tribuna 24/7",
+      "descripcion": "Mis canciones sin parar, con cuñas de la radio.",
+      "categoria": "radio",
+      "tipo": "radio",
+      "fuente": "UUY3OjJioibg2IrIPgh4QTUQ",
+      "pistas": [],
+      "cunas": [],
+      "cada": 4
+    },
+    {
+      "id": "setsdj",
+      "nombre": "Sets DJ Carlos Bazo",
+      "descripcion": "Mezclas y envivos grabados. Cambia la fuente por tu lista de sets.",
+      "categoria": "sets",
+      "tipo": "playlist",
+      "fuente": "PON_AQUI_ID_DE_LISTA_DE_SETS"
     },
     {
       "id": "spotify",
@@ -999,5 +1026,22 @@ window.RDT_CONFIG = {
       "abrir": "https://music.youtube.com/playlist?list=OLAK5uy_kvyBijO6iTY5DSChOuIUg9-zCNiGrRHQM",
       "textoAbrir": "YouTube Music ↗"
     }
-  ]
+  ],
+  "envivoAhora": {
+    "activo": false,
+    "texto": "Ritmo de Tribuna está transmitiendo en TikTok",
+    "enlace": "https://www.tiktok.com/@ritmodetribuna/live"
+  },
+  "apk": {
+    "fans": {
+      "version": 2,
+      "nombre": "v1.1",
+      "url": "https://github.com/CLAZO12/ritmodetribuna-tv/releases/latest/download/RitmoDeTribunaTV-Fans.apk"
+    },
+    "dueno": {
+      "version": 2,
+      "nombre": "v1.1",
+      "url": ""
+    }
+  }
 };

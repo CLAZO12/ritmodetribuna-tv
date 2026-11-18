@@ -115,11 +115,13 @@
 </main>
 
 <script src="canales.js"></script>
+<script src="rdt-extras.js"></script>
 <script>
 (function(){
   const $ = s => document.querySelector(s);
   let CFG = window.RDT_CONFIG || {categorias:[],canales:[]};
   try{ const g = JSON.parse(localStorage.getItem("rdt_cfg")||"null"); if(g && g.canales) CFG = Object.assign({}, CFG, g); }catch(e){}
+  let BASE = CFG;
   let actual = null, categoria = "todo", texto = "";
 
   /* ---------- almacenamiento seguro de favoritos ---------- */
@@ -151,6 +153,8 @@
     if(c.tipo==="spotify") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#1ed760,#0b5d2a);font-size:15px;letter-spacing:1px">SPOTIFY</span>`;
     if(c.tipo==="tiktok") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#111 30%,#25f4ee 140%);box-shadow:inset -6px 0 0 #fe2c55;font-size:14px;letter-spacing:1px">♪ TIKTOK</span>`;
     if(c.tipo==="playlist") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#ff2a2a,#7a0010);font-size:14px;letter-spacing:1px">▶ PLAYLIST</span>`;
+    if(c.tipo==="radio") return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:radial-gradient(circle at 50% 30%,#2f7bff,#071a3d);font-size:15px;letter-spacing:1px">📻 RADIO 24/7</span>`;
+    if(c.privado) return `<span style="position:absolute;inset:0;display:grid;place-items:center;background:linear-gradient(135deg,#1d2f63,#071330);font-size:13px">📡</span>${c.logo?`<img loading="lazy" alt="" src="${esc(c.logo)}" style="object-fit:contain;padding:12px" onerror="this.remove()">`:""}`;
     if(c.imagen) return `<img loading="lazy" alt="" src="${esc(c.imagen)}" onerror="this.remove()">`;
     return "";
   }
@@ -196,6 +200,7 @@
   function reproducir(c){
     actual = c; limpiar(); pintarAhora(); pintar();
     window.scrollTo({top:0,behavior:"smooth"});
+    if(window.rdtReproducir && window.rdtReproducir(c, $("#pantalla"))){ if(c.tipo==="radio") avisarAndroid(true,false); return; }
     if(!pendiente(c)) avisarAndroid(true, c.tipo==="tiktok");
     if(pendiente(c)) return aviso("Canal por configurar", "Edita canales.js y pon el ID o la URL de este contenido.");
     const p = $("#pantalla");
@@ -261,13 +266,15 @@
   function iniciar(){
     $("#nombre").textContent = CFG.nombre||"Ritmo de Tribuna TV";
     $("#subtitulo").textContent = CFG.subtitulo||"";
+    CFG = window.rdtPrep ? window.rdtPrep(BASE) : BASE;
     pintarPestanas(); pintar();
+    try{ window.rdtIniciado && window.rdtIniciado(CFG); }catch(e){}
   }
   iniciar();
-  if(CFG.urlRemota){
-    fetch(CFG.urlRemota+(CFG.urlRemota.includes("?")?"&":"?")+"t="+Date.now())
+  if(BASE.urlRemota){
+    fetch(BASE.urlRemota+(BASE.urlRemota.includes("?")?"&":"?")+"t="+Date.now())
       .then(r=>r.text()).then(t=>{ const j = JSON.parse(t.trim().startsWith("{") ? t : t.slice(t.indexOf("{", t.indexOf("RDT_CONFIG")), t.lastIndexOf("}")+1));
-        delete j.urlRemota; CFG = Object.assign({}, CFG, j); try{ localStorage.setItem("rdt_cfg", JSON.stringify(j)); }catch(e){} iniciar(); })
+        delete j.urlRemota; BASE = Object.assign({}, BASE, j); try{ localStorage.setItem("rdt_cfg", JSON.stringify(j)); }catch(e){} iniciar(); })
       .catch(()=>{});
   }
   /* Botón "atrás" de Android: si hay algo sonando, primero lo detiene */
