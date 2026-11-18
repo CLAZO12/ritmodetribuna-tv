@@ -17,10 +17,10 @@
   const prepAnterior = window.rdtPrep;
   window.rdtPrep = function(CFG){
     const c = prepAnterior ? prepAnterior(CFG) : Object.assign({}, CFG);
-    if (!(c.categorias || []).some(k => k.id === "musica")) c.categorias = [{ id: "musica", nombre: "🎧 Mi música" }].concat(c.categorias || []);
+    if (!(c.categorias || []).some(k => k.id === "mimusica")) c.categorias = [{ id: "mimusica", nombre: "🎧 Mi música" }].concat(c.categorias || []);
     return c;
   };
-  const activa = () => { const p = document.querySelector(".pestana.activa"); return p && p.dataset.cat === "musica"; };
+  const activa = () => { const p = document.querySelector(".pestana.activa"); return p && p.dataset.cat === "mimusica"; };
   function cargar(){
     if (cat) return Promise.resolve(cat);
     return fetch(URL_CAT + "?t=" + Math.floor(Date.now() / 6e5)).then(r => r.json()).then(j => {
@@ -33,6 +33,7 @@
   /* ---------- vista ---------- */
   const css = document.createElement("style");
   css.textContent = `
+  #grilla:has(> #mm){display:block !important}
   #mm{color:#fff}
   #mm .barra{display:flex;gap:14px;align-items:center;padding:12px;border-radius:16px;background:linear-gradient(135deg,#123a9c,#071a3d);margin-bottom:14px}
   #mm .barra img{width:64px;height:64px;border-radius:10px;object-fit:cover;background:#0b2a6f}
