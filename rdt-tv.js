@@ -91,4 +91,13 @@
       l.style.left = Math.random() * Math.max(10, innerWidth - 520) + "px"; l.style.top = Math.random() * Math.max(10, innerHeight - 120) + "px"; setTimeout(mover, 6500); };
     setTimeout(mover, 50);
   }, 15000);
+  /* ---------- ventanita (imagen en imagen): le avisa a Android cuando algo suena ---------- */
+  let pipAntes = null;
+  setInterval(() => {
+    const p = document.getElementById("pantalla");
+    const on = !!(p && p.querySelector("iframe, video, audio")) || !!(window.rdtMusicaSonando && window.rdtMusicaSonando());
+    const vert = !!(p && p.classList.contains("vertical") && p.querySelector("iframe, video"));
+    const k = on + "|" + vert;
+    if (k !== pipAntes){ pipAntes = k; try{ window.Android && Android.reproduciendo(on, vert); }catch(e){} }
+  }, 1500);
 })();

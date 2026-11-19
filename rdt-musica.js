@@ -9,6 +9,7 @@
   const mmss = s => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
   let cat = null, todas = [], cola = [], idx = -1, aleatorio = false, repetir = false, vista = "albumes", albumSel = null;
   const audio = new Audio(); audio.preload = "none";
+  window.rdtMusicaSonando = () => !audio.paused;
   const favKey = () => "rdt_mm_fav_" + (LS.get("rdt_perfil") || "p0");
   const favs = () => { try{ return new Set(JSON.parse(LS.get(favKey()) || "[]")); }catch(e){ return new Set(); } };
   const togFav = a => { const f = favs(); f.has(a) ? f.delete(a) : f.add(a); LS.set(favKey(), JSON.stringify([...f])); pintar(); };
