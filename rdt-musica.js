@@ -8,6 +8,8 @@
   const LS = { get: k => { try{ return localStorage.getItem(k); }catch(e){ return null; } }, set: (k, v) => { try{ localStorage.setItem(k, v); }catch(e){} } };
   const mmss = s => { s = Math.max(0, Math.round(s || 0)); return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0"); };
   let cat = null, todas = [], cola = [], idx = -1, aleatorio = false, repetir = false, vista = "albumes", albumSel = null;
+  const URL_LETRAS = "https://clazo12.github.io/ritmodetribuna-tv/letras/";
+  let letra = null, letraDe = null, verLetra = true;
   const audio = new Audio(); audio.preload = "none";
   window.rdtMusicaSonando = () => !audio.paused;
   const favKey = () => "rdt_mm_fav_" + (LS.get("rdt_perfil") || "p0");
@@ -52,6 +54,8 @@
   #mm .can.sonando{outline:2px solid #fff}#mm .can img{width:44px;height:44px;border-radius:8px;object-fit:cover}
   #mm .can .t{flex:1;min-width:0}#mm .can b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:15px}#mm .can small{color:#9fc0ff}
   #mm .can a,#mm .can span.f{padding:6px 9px;border-radius:999px;background:rgba(255,255,255,.1);color:#fff;text-decoration:none;font-size:14px}
+  #mm .letra{margin:-4px 0 14px;padding:14px 16px;border-radius:16px;background:rgba(0,0,0,.28);text-align:center;line-height:1.35}
+  #mm .letra p{margin:2px 0;color:#9fb0d9;font-size:16px;transition:all .25s}#mm .letra p.ya{color:#ffd400;font-size:24px;font-weight:900}
   #mm .redes{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}#mm .redes a{padding:8px 12px;border-radius:999px;color:#fff;text-decoration:none;font-weight:800;font-size:14px}`;
   document.head.appendChild(css);
 
@@ -63,7 +67,7 @@
     const barra = `<div class="barra">${c ? `<img src="${esc(c.img)}" alt="">` : `<img alt="">`}<div class="t"><b>${c ? esc(c.titulo) : "Elige una canción"}</b>
       <small>${c ? esc(c.album) + " · Ritmo de Tribuna" : "Toda la música de Ritmo de Tribuna, gratis para la hinchada"}</small><div class="pg"><i id="mmPg"></i></div></div>
       <div class="ctl"><button data-a="ant">⏮</button><button data-a="play">${audio.paused ? "▶" : "⏸"}</button><button data-a="sig">⏭</button>
-      <button data-a="alea" class="${aleatorio ? "on" : ""}" title="Aleatorio">🔀</button><button data-a="rep" class="${repetir ? "on" : ""}" title="Repetir">🔁</button></div></div>`;
+      <button data-a="alea" class="${aleatorio ? "on" : ""}" title="Aleatorio">🔀</button><button data-a="letra" class="${verLetra ? "on" : ""}" title="Letra">🎤</button><button data-a="rep" class="${repetir ? "on" : ""}" title="Repetir">🔁</button></div></div>`;
     const chips = `<div class="chips"><button data-v="albumes" class="${vista === "albumes" ? "on" : ""}">💿 Álbumes</button><button data-v="todas" class="${vista === "todas" ? "on" : ""}">🎵 Todas (${todas.length})</button>
       <button data-v="favs" class="${vista === "favs" ? "on" : ""}">❤️ Mis favoritas (${[...f].length})</button><button data-a="todo">▶ Escuchar todo</button></div>`;
     let cuerpo = "";
@@ -78,13 +82,39 @@
           : `<p>Aún no tienes favoritas. Toca 🤍 en una canción para guardarla.</p>`);
     }
     const redes = `<div class="redes"><a href="https://open.spotify.com/artist/3UfsHgWx8pKJIc22zsO9xv" style="background:#1db954">🎧 Escúchame en Spotify</a><a href="https://www.youtube.com/@RitmoDeTribuna" style="background:#e0102a">▶ YouTube</a><a href="https://www.tiktok.com/@ritmodetribuna" style="background:#111">TikTok</a></div>`;
-    g.innerHTML = `<div id="mm">${barra}${chips}${cuerpo}${redes}</div>`;
+    g.innerHTML = `<div id="mm">${barra}<div class="letra" id="mmLetra" style="display:none"></div>${chips}${cuerpo}${redes}</div>`;
+    pintarLetra(true);
+  }
+
+  /* ---------- letra sincronizada (archivos .lrc en la carpeta «letras» del repositorio) ---------- */
+  function leerLRC(t){
+    const out = [];
+    t.split(/\r?\n/).forEach(l => {
+      const marcas = [...l.matchAll(/\[(\d+):(\d+(?:\.\d+)?)\]/g)], txt = l.replace(/\[[^\]]*\]/g, "").trim();
+      marcas.forEach(m => out.push({ t: +m[1] * 60 + +m[2], x: txt }));
+    });
+    return out.filter(x => x.x).sort((a, b) => a.t - b.t);
+  }
+  function cargarLetra(c){
+    letra = null; letraDe = c.archivo; pintarLetra(true);
+    fetch(URL_LETRAS + encodeURIComponent(c.archivo.replace(/\.mp3$/i, ".lrc")) + "?t=" + Math.floor(Date.now() / 6e5))
+      .then(r => r.ok ? r.text() : "").then(t => { if (letraDe === c.archivo){ letra = leerLRC(t); pintarLetra(true); } }).catch(() => {});
+  }
+  let letraIdx = -2;
+  function pintarLetra(forzar){
+    const el = document.getElementById("mmLetra"); if (!el) return;
+    if (!verLetra || !letra || !letra.length){ el.style.display = "none"; return; }
+    let i = -1; for (let k = 0; k < letra.length && letra[k].t <= audio.currentTime + 0.2; k++) i = k;
+    if (i === letraIdx && !forzar) return; letraIdx = i;
+    const ln = k => k >= 0 && k < letra.length ? esc(letra[k].x) : "&nbsp;";
+    el.style.display = "";
+    el.innerHTML = `<p>${ln(i - 1)}</p><p class="ya">${i < 0 ? "🎤 …" : ln(i)}</p><p>${ln(i + 1)}</p>`;
   }
 
   /* ---------- reproducción ---------- */
   function sonar(i){
     if (!cola.length) return; idx = (i + cola.length) % cola.length; const c = cola[idx];
-    audio.src = c.url; const p = audio.play(); if (p && p.catch) p.catch(() => {});
+    audio.src = c.url; cargarLetra(c); const p = audio.play(); if (p && p.catch) p.catch(() => {});
     if ("mediaSession" in navigator){ try{ navigator.mediaSession.metadata = new MediaMetadata({ title: c.titulo, artist: "Ritmo de Tribuna", album: c.album, artwork: [{ src: c.img, sizes: "800x800", type: "image/jpeg" }] });
       navigator.mediaSession.setActionHandler("nexttrack", () => sig()); navigator.mediaSession.setActionHandler("previoustrack", () => sonar(idx - 1)); }catch(e){} }
     try{ window.Android && Android.reproduciendo && Android.reproduciendo(true, false); }catch(e){}
@@ -93,7 +123,7 @@
   function sig(){ if (!cola.length) return; if (aleatorio) sonar(Math.floor(Math.random() * cola.length)); else if (idx + 1 < cola.length || repetir) sonar(idx + 1); else { audio.pause(); pintar(); } }
   function ponerCola(lista, empezar){ cola = lista.slice(); idx = -1; sonar(empezar || 0); }
   audio.addEventListener("ended", () => repetir && cola.length === 1 ? sonar(idx) : sig());
-  audio.addEventListener("timeupdate", () => { const i = document.getElementById("mmPg"); if (i && audio.duration) i.style.width = (audio.currentTime / audio.duration * 100) + "%"; });
+  audio.addEventListener("timeupdate", () => { const i = document.getElementById("mmPg"); if (i && audio.duration) i.style.width = (audio.currentTime / audio.duration * 100) + "%"; pintarLetra(); });
   audio.addEventListener("play", pintar); audio.addEventListener("pause", pintar);
 
   document.addEventListener("click", e => {
@@ -111,7 +141,7 @@
     const a = b.dataset.a;
     if (a === "play"){ if (!cola.length) ponerCola(todas); else if (audio.paused) audio.play(); else audio.pause(); }
     else if (a === "sig") sig(); else if (a === "ant") sonar(idx - 1);
-    else if (a === "alea"){ aleatorio = !aleatorio; pintar(); } else if (a === "rep"){ repetir = !repetir; pintar(); }
+    else if (a === "letra"){ verLetra = !verLetra; pintar(); } else if (a === "alea"){ aleatorio = !aleatorio; pintar(); } else if (a === "rep"){ repetir = !repetir; pintar(); }
     else if (a === "todo"){ aleatorio = true; ponerCola(todas, Math.floor(Math.random() * todas.length)); }
     else if (a === "volver"){ albumSel = null; pintar(); }
     else if (a === "playalb") ponerCola(todas.filter(x => x.album === albumSel));
