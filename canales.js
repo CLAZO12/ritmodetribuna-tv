@@ -1034,13 +1034,13 @@ window.RDT_CONFIG = {
   },
   "apk": {
     "fans": {
-      "version": 3,
-      "nombre": "v1.2",
+      "version": 4,
+      "nombre": "v1.3",
       "url": "https://github.com/CLAZO12/ritmodetribuna-tv/releases/latest/download/RitmoDeTribunaTV-Fans.apk"
     },
     "dueno": {
-      "version": 3,
-      "nombre": "v1.2",
+      "version": 4,
+      "nombre": "v1.3",
       "url": ""
     }
   },
